@@ -38,7 +38,7 @@ jobs:
       - run: cargo test --verbose
       - run: cargo test --verbose --no-default-features
       - run: cargo test --verbose --all-features
-        if: ${{ matrix.rust == 'nightly' || matrix.rust = 'nightly-i686-msvc' }}
+        if: ${{ matrix.rust == 'nightly' || matrix.rust == 'nightly-i686-msvc' }}
 
   cross-test:
     name: Test on ${{ matrix.target }} (using cross)
