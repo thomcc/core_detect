@@ -64,11 +64,15 @@
         not(any(
             target_env = "sgx",
             all(not(target_env = "sgx"), target_arch = "x86_64"),
-            all(not(target_env = "sgx"), target_arch = "x86", not(target_feature = "sse"))
+            all(
+                not(target_env = "sgx"),
+                target_arch = "x86",
+                not(target_feature = "sse")
+            )
         )),
         feature = "unstable_has_cpuid",
     ),
-    feature(stdsimd),
+    feature(stdsimd)
 )]
 
 #[macro_use]
@@ -84,7 +88,7 @@ mod arch;
 mod arch {
     #[doc(hidden)]
     pub(crate) enum Feature {
-        Null
+        Null,
     }
 
     #[doc(hidden)]
@@ -92,15 +96,19 @@ mod arch {
 
     impl Feature {
         #[doc(hidden)]
-        pub(crate) fn from_str(_s: &str) -> Result<Feature, ()> { Err(()) }
+        pub(crate) fn from_str(_s: &str) -> Result<Feature, ()> {
+            Err(())
+        }
         #[doc(hidden)]
-        pub(crate) fn to_str(self) -> &'static str { "" }
+        pub(crate) fn to_str(self) -> &'static str {
+            ""
+        }
     }
 }
 
+pub(crate) use crate::arch::Feature;
 #[doc(hidden)]
 pub use crate::arch::__is_feature_detected;
-pub(crate) use crate::arch::Feature;
 
 /// Performs run-time feature detection.
 #[inline]

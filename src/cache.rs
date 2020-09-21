@@ -3,7 +3,7 @@
 
 #![allow(dead_code)] // not used on all platforms
 
-use core::sync::atomic::{Ordering, AtomicUsize};
+use core::sync::atomic::{AtomicUsize, Ordering};
 
 /// Sets the `bit` of `x`.
 #[inline]
