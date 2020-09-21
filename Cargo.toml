@@ -3,6 +3,7 @@ name = "core_detect"
 version = "0.1.0"
 authors = ["Thom Chiovoloni <chiovolonit@gmail.com>"]
 edition = "2018"
+description = "A `no_std` version of the `std::is_x86_feature_detected!` macro."
 documentation = "https://docs.rs/core_detect"
 homepage = "https://github.com/thomcc/core_detect"
 repository = "https://github.com/thomcc/core_detect"
