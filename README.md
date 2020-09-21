@@ -1,5 +1,9 @@
 # `core_detect`
 
+[![Build Status](https://github.com/thomcc/core_detect/workflows/CI/badge.svg)](https://github.com/thomcc/core_detect/actions)
+[![Docs](https://docs.rs/core_detect/badge.svg)](https://docs.rs/core_detect)
+[![Latest Version](https://img.shields.io/crates/v/core_detect.svg)](https://crates.io/crates/core_detect)
+
 This crate provides a `no_std` version of the `std::is_x86_feature_detected!` macro.
 
 This is possible because x86 chips can just use the `cpuid` instruction to detect CPU features, whereas most other architectures require either reading files or querying the OS.
