@@ -60,16 +60,9 @@
 #![allow(dead_code)]
 #![cfg_attr(
     all(
-        any(target_arch = "x86", target_arch = "x86_64"),
-        not(any(
-            target_env = "sgx",
-            all(not(target_env = "sgx"), target_arch = "x86_64"),
-            all(
-                not(target_env = "sgx"),
-                target_arch = "x86",
-                not(target_feature = "sse")
-            )
-        )),
+        target_arch = "x86",
+        not(target_env = "sgx"),
+        not(target_feature = "sse"),
         feature = "unstable_has_cpuid",
     ),
     feature(stdsimd)
