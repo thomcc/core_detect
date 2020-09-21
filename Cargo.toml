@@ -1,0 +1,22 @@
+[package]
+name = "core_detect"
+version = "0.1.0"
+authors = ["Thom Chiovoloni <chiovolonit@gmail.com>"]
+edition = "2018"
+documentation = "https://docs.rs/core_detect"
+homepage = "https://github.com/thomcc/core_detect"
+repository = "https://github.com/thomcc/core_detect"
+readme = "README.md"
+keywords = ["run-time", "feature", "detection", "x86"]
+categories = ["hardware-support", "no_std"]
+license = "MIT/Apache-2.0"
+
+[features]
+unstable_has_cpuid = []
+assume_has_cpuid = []
+default = ["assume_has_cpuid"]
+
+[dependencies]
+
+[dev-dependencies]
+cupid = "0.6"
