@@ -43,6 +43,8 @@ jobs:
   cross-test:
     name: Test on ${{ matrix.target }} (using cross)
     runs-on: ubuntu-latest
+    env:
+      RUSTUP_TOOLCHAIN: nightly
     strategy:
       fail-fast: false
       matrix:
