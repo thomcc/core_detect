@@ -15,9 +15,7 @@ license = "MIT/Apache-2.0"
 [features]
 unstable_has_cpuid = []
 assume_has_cpuid = []
-default = ["assume_has_cpuid"]
-
-[dependencies]
+default = []
 
 [dev-dependencies]
 cupid = "0.6"
