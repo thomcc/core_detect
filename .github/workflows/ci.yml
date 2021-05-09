@@ -35,8 +35,8 @@ jobs:
       - uses: hecrj/setup-rust-action@v1
         with:
           rust-version: ${{ matrix.rust }}
+      - run: cargo test --verbose --features=assume_has_cpuid
       - run: cargo test --verbose
-      - run: cargo test --verbose --no-default-features
         env:
           RUSTFLAGS: --cfg allow_false_negative
       - run: cargo test --verbose --all-features
@@ -63,10 +63,10 @@ jobs:
         with:
           rust-version: nightly
       - run: cargo install cross
-      - run: cross test --verbose --target=${{ matrix.target }}
+      - run: cross test --verbose --target=${{ matrix.target }} --features=assume_has_cpuid
       - run: cross test --verbose --target=${{ matrix.target }} --all-features
       - run: cross clean
-      - run: cross test --verbose --target=${{ matrix.target }} --no-default-features
+      - run: cross test --verbose --target=${{ matrix.target }}
         env:
           RUSTFLAGS: --cfg allow_false_negative
 
@@ -80,9 +80,9 @@ jobs:
       - uses: hecrj/setup-rust-action@v1
         with:
           rust-version: nightly
-      - run: cargo check --workspace --all-targets --verbose
-      - run: cargo check --workspace --all-targets --verbose --no-default-features
+      - run: cargo check --workspace --all-targets --verbose --features=assume_has_cpuid
       - run: cargo check --workspace --all-targets --verbose --all-features
+      - run: cargo check --workspace --all-targets --verbose
 
   rustfmt:
     name: Verify code formatting
