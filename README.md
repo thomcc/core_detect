@@ -11,7 +11,7 @@ This is possible because x86 chips can just use the `cpuid` instruction to detec
 
 ## Usage
 
-Add `core_detect = "0.1"` to the `[dependencies]` section of your Cargo.toml.
+Add `core_detect = "1"` to the `[dependencies]` section of your Cargo.toml.
 
 ```rust
 if core_detect::is_x86_feature_detected!("ssse3") {
