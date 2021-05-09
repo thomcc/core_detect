@@ -36,11 +36,10 @@
 //! If you run `cpuid` on a machine older than that, it causes an illegal
 //! instruction fault (SIGILL). Unfortunately, there's no good stable way to
 //! reliably determine if `cpuid` will fault in stable rust: A
-//! [`core::arch::x86::has_cpuid`](arch_has_cpuid) function exists, but didn't
-//! stabilize with the rest of `core::arch::x86`, and the only way to implement
-//! it ourselves is with inline asm, which... is also still unstable.
-//!
-//! [arch_has_cpuid]: https://doc.rust-lang.org/nightly/core/arch/x86/fn.has_cpuid.html
+//! [`core::arch::x86::has_cpuid`](https://doc.rust-lang.org/nightly/core/arch/x86/fn.has_cpuid.html)
+//! function exists, but didn't stabilize with the rest of `core::arch::x86`,
+//! and the only way to implement it ourselves is with inline asm, which... is
+//! also still unstable.
 //!
 //! For what it's worth, it's actually pretty uncommon that we'd need to call
 //! `has_cpuid` on common rust targets, since we perform the following compile
@@ -68,7 +67,7 @@
 //!     If you do happen to run the instruction, the process crashes, but in a
 //!     controlled manner — Executing an illegal instruction to tringger a
 //!     SIGILL is what `core::intrinsics::abort` does on x86, so it's not
-//!     unsound or anything.
+//!     dangerous or anything.
 //!
 //! 3. Using unstable nightly features (`feature = "unstable_has_cpuid"`): This
 //!    approach requires a nightly compiler, but has no other major downsides,

@@ -3,6 +3,7 @@
 [![Build Status](https://github.com/thomcc/core_detect/workflows/CI/badge.svg)](https://github.com/thomcc/core_detect/actions)
 [![Docs](https://docs.rs/core_detect/badge.svg)](https://docs.rs/core_detect)
 [![Latest Version](https://img.shields.io/crates/v/core_detect.svg)](https://crates.io/crates/core_detect)
+![Minimum Rust Version](https://img.shields.io/badge/MSRV%201.32-blue.svg)
 
 This crate provides a `no_std` version of the `std::is_x86_feature_detected!` macro.
 
