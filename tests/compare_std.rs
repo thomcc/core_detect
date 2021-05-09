@@ -53,7 +53,10 @@ fn compare_with_std() {
     check_feature!("xsaveopt");
     check_feature!("xsavec");
     check_feature!("xsaves");
-    check_feature!("cmpxchg16b");
-    check_feature!("adx");
-    check_feature!("rtm");
+    // Our crate has no issue with these (see `compare_cupidq), but libstd
+    // didn't get them until versions after our MSRV.
+
+    // check_feature!("cmpxchg16b");
+    // check_feature!("adx");
+    // check_feature!("rtm");
 }
