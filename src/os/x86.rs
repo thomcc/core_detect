@@ -20,38 +20,67 @@ mod bit {
 #[inline]
 fn have_cpuid() -> bool {
     #[cfg(target_env = "sgx")]
-    {
-        false
-    }
+    return false;
     #[cfg(all(not(target_env = "sgx"), target_arch = "x86_64"))]
-    {
-        true
-    }
-    #[cfg(all(not(target_env = "sgx"), target_arch = "x86"))]
-    {
-        // Optimization for i586 and i686 Rust targets which SSE enabled
-        // and support cpuid:
-        #[cfg(target_feature = "sse")]
-        {
-            true
-        }
-        #[cfg(all(not(target_feature = "sse"), feature = "unstable_has_cpuid"))]
-        {
-            has_cpuid()
-        }
-        #[cfg(all(not(target_feature = "sse"), not(feature = "unstable_has_cpuid")))]
-        {
-            // FIXME: This is wrong for machines before 1994. On those machines,
-            // we'll SIGILL (this isn't great, but in practice it should be
-            // well-defined enough). In practice, it's almost impossible to
-            // target these machines with LLVM, but it probably can be done —
-            // stdarch's detect code handles it after all. If we need to handle
-            // this, we can compile and link with some C code that uses inline
-            // ASM to detect cpuid, but for now this is probably fine in
-            // practice.
-            cfg!(feature = "assume_has_cpuid")
-        }
-    }
+    return true;
+    // Optimization for i586 and i686 Rust targets which SSE enabled
+    // and support cpuid:
+    #[cfg(all(not(target_env = "sgx"), target_arch = "x86", target_feature = "sse"))]
+    return true;
+    #[cfg(all(
+        core_detect_can_have_a_little_asm_as_a_treat,
+        target_arch = "x86",
+        not(target_feature = "sse"),
+        not(target_env = "sgx"),
+    ))]
+    unsafe {
+        // On `x86` the `cpuid` instruction is not always available.
+        // This follows the approach indicated in:
+        // http://wiki.osdev.org/CPUID#Checking_CPUID_availability
+        // https://software.intel.com/en-us/articles/using-cpuid-to-detect-the-presence-of-sse-41-and-sse-42-instruction-sets/
+        // which detects whether `cpuid` is available by checking whether
+        // the 21st bit of the EFLAGS register is modifiable or not.
+        // If it is, then `cpuid` is available.
+        let result: u32;
+        core::arch::asm!(
+            // Read eflags and save a copy of it
+            "pushfd",
+            "pop {result}",
+            "mov {result}, {saved_flags}",
+            // Flip 21st bit of the flags
+            "xor $0x200000, {result}",
+            // Load the modified flags and read them back.
+            // Bit 21 can only be modified if cpuid is available.
+            "push {result}",
+            "popfd",
+            "pushfd",
+            "pop {result}",
+            // Use xor to find out whether bit 21 has changed
+            "xor {saved_flags}, {result}",
+            result = out(reg) result,
+            saved_flags = out(reg) _,
+            options(nomem, att_syntax),
+        );
+        // There is a race between popfd (A) and pushfd (B)
+        // where other bits beyond 21st may have been modified due to
+        // interrupts, a debugger stepping through the asm, etc.
+        //
+        // Therefore, explicitly check whether the 21st bit
+        // was modified or not.
+        //
+        // If the result is zero, the cpuid bit was not modified.
+        // If the result is `0x200000` (non-zero), then the cpuid
+        // was correctly modified and the CPU supports the cpuid
+        // instruction:
+        return (result & 0x200000) != 0;
+    };
+    #[cfg(all(
+        target_arch = "x86",
+        not(core_detect_can_have_a_little_asm_as_a_treat),
+        not(target_feature = "sse"),
+        not(target_env = "sgx"),
+    ))]
+    return cfg!(feature = "assume_has_cpuid");
 }
 
 /// Run-time feature detection on x86 works by using the CPUID instruction.
@@ -291,6 +320,26 @@ pub(crate) fn detect_features() -> cache::Initializer {
             enable(extended_proc_info_ecx, 6, Feature::sse4a);
             enable(extended_proc_info_ecx, 21, Feature::tbm);
         }
+    }
+
+    // Unfortunately, some Skylake chips erroneously report support for BMI1 and
+    // BMI2 without actual support. These chips don't support AVX, and it seems
+    // that all Intel chips with non-erroneous support BMI do (I didn't check
+    // other vendors), so we can disable these flags for chips that don't also
+    // report support for AVX.
+    //
+    // It's possible this will pessimize future chips that do support BMI and
+    // not AVX, but this seems minor compared to a hard crash you get when
+    // executing an unsupported instruction (to put it another way, it's safe
+    // for us to under-report CPU features, but not to over-report them). Still,
+    // to limit any impact this may have in the future, we only do this for
+    // Intel chips, as it's a bug only present in their chips.
+    //
+    // This bug is documented as `SKL052` in the errata section of this document:
+    // http://www.intel.com/content/dam/www/public/us/en/documents/specification-updates/desktop-6th-gen-core-family-spec-update.pdf
+    if vendor_id == *b"GenuineIntel" && !value.test(Feature::avx as u32) {
+        value.unset(Feature::bmi1 as u32);
+        value.unset(Feature::bmi2 as u32);
     }
 
     value

@@ -17,6 +17,12 @@ const fn test_bit(x: u64, bit: u32) -> bool {
     x & (1 << bit) != 0
 }
 
+/// Unset the `bit of `x`.
+#[inline]
+const fn unset_bit(x: u64, bit: u32) -> u64 {
+    x & !(1 << bit)
+}
+
 /// Maximum number of features that can be cached.
 const CACHE_CAPACITY: u32 = 62;
 
@@ -53,6 +59,12 @@ impl Initializer {
         );
         let v = self.0;
         self.0 = set_bit(v, bit);
+    }
+    /// Sets the `bit` of the cache.
+    #[inline]
+    pub(crate) fn unset(&mut self, bit: u32) {
+        let v = self.0;
+        self.0 = unset_bit(v, bit);
     }
 }
 
