@@ -27,65 +27,8 @@
 //!
 //! (In the future, this crate may provide another macro which returns false in
 //! these cases instead, and supports testing multiple features simultaneously).
-//!
-//! # Caveats
-//! The `cpuid` instruction doesn't exist on all x86 machines, it was added
-//! around 1994. (It's also not available on SGX, but this doesn't cause any
-//! issues since we can check that with `cfg(target_env = "sgx")`).
-//!
-//! If you run `cpuid` on a machine older than that, it causes an illegal
-//! instruction fault (SIGILL). Unfortunately, there's no good stable way to
-//! reliably determine if `cpuid` will fault in stable rust: A
-//! [`core::arch::x86::has_cpuid`](https://doc.rust-lang.org/nightly/core/arch/x86/fn.has_cpuid.html)
-//! function exists, but didn't stabilize with the rest of `core::arch::x86`,
-//! and the only way to implement it ourselves is with inline asm, which... is
-//! also still unstable.
-//!
-//! For what it's worth, it's actually pretty uncommon that we'd need to call
-//! `has_cpuid` on common rust targets, since we perform the following compile
-//! time checks:
-//! - We never have cpuid on `target_env = "sgx"` (as mentioned).
-//! - We always have cpuid on `target_arch = "x86_64"`.
-//! - And we always have cpuid if `target_feature = "sse"` (which covers the
-//!   `i686-*` targets).
-//!
-//! Unfortunately, if none of those applies... we don't know if calling CPUID
-//! will crash the process. This library has a few ways it can handle this:
-//!
-//! 1. Cautiously (the default): In this mode, we conceptually swap `has_cpuid`
-//!    out with a function that always returns false. That is: we never call it
-//!    unless we're sure it wont crash the process.
-//!
-//! 2. Recklessly (`feature = "assume_has_cpuid"`): This is essentially the
-//!    opposite of the last one — assume `has_cpuid` would have returned true,
-//!    and call `cpuid` anyway.
-//!
-//!     In practice, this should be fine. These machines are rare now (they're
-//!     over 30 years old...), and pretty only are common through QEMU, and even
-//!     then, usually after a misconfiguration.
-//!
-//!     If you do happen to run the instruction, the process crashes, but in a
-//!     controlled manner — Executing an illegal instruction to tringger a
-//!     SIGILL is what `core::intrinsics::abort` does on x86, so it's not
-//!     dangerous or anything.
-//!
-//! 3. Using unstable nightly features (`feature = "unstable_has_cpuid"`): This
-//!    approach requires a nightly compiler, but has no other major downsides,
-//!    besides the fact that the `has_cpuid` function could vanish at any time.
-//!
-//! Eventually, inline asm will stabilize and we can solve this problem more
-//! cleanly.
 #![no_std]
 #![allow(dead_code)]
-#![cfg_attr(
-    all(
-        target_arch = "x86",
-        not(target_env = "sgx"),
-        not(target_feature = "sse"),
-        feature = "unstable_has_cpuid",
-    ),
-    feature(stdsimd)
-)]
 
 #[macro_use]
 mod macros;
